@@ -1,5 +1,6 @@
 import os
 from flask import jsonify, request
+from pathlib import Path
 
 
 class ApiError(Exception):
@@ -36,6 +37,7 @@ def get_docs_path_for(file_name):
     """
     Get absolute path for api files.
     """
-    file_path = os.path.join("../api-docs", file_name)
+    location = Path(__file__).absolute().parent
+    file_path = os.path.join(str(location)+"/api-docs", file_name)
     return file_path
 
