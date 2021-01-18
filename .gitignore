@@ -1,0 +1,5 @@
+.idea/
+build/
+dist/
+git2pantheon.egg-info/
+venv/
