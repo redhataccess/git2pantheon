@@ -4,6 +4,7 @@ entry_points = {
         'git2pantheon = git2pantheon.wsgi:main'
     ]
 }
+package_data = ['*.yaml']
 setup(
     name='git2pantheon',
     version='0.1',
@@ -41,5 +42,6 @@ setup(
         'pantheon-uploader @ git+https://github.com/redhataccess/pantheon-uploader/tarball/master#egg=pantheon-uploader-0.2'
     ],
     dependency_links=['https://github.com/redhataccess/pantheon-uploader/tarball/master#egg=pantheon-uploader'],
-    entry_points=entry_points
+    entry_points=entry_points,
+    package_data={'': package_data}
 )
