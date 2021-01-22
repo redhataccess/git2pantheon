@@ -9,5 +9,5 @@ flask-cors==3.0.10
 marshmallow==3.10.0
 Flask-Executor==0.9.4
 giturlparse==0.10.0
-PyYAML==5.3.1
+PyYAML==5.4.1
 git+https://github.com/redhataccess/pantheon-uploader.git
