@@ -1,13 +1,13 @@
-flasgger~=0.9.5
-Flask~=1.1.2
+flasgger==0.9.5
+Flask==1.1.2
 git2pantheon~=0.1
-Werkzeug~=1.0.1
-redis~=3.5.3
-setuptools~=51.1.2
-flask-cors~=3.0.9
+Werkzeug==1.0.1
+redis==3.5.3
+setuptools==51.1.2
+flask-cors==3.0.10
 
-marshmallow~=3.10.0
-Flask-Executor~=0.9.4
-giturlparse~=0.10.0
-PyYAML~=5.3.1
+marshmallow==3.10.0
+Flask-Executor==0.9.4
+giturlparse==0.10.0
+PyYAML==5.3.1
 git+https://github.com/redhataccess/pantheon-uploader.git
