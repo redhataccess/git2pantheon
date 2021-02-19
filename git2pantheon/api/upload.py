@@ -28,14 +28,11 @@ logger = logging.getLogger(__name__)
 @swag_from(get_docs_path_for('clone_api.yaml'))
 @api_blueprint.route('/clone', methods=['POST'])
 def push_repo():
-    if not request.data:
-        logger.error("The request did not contain data")
-        raise ApiError(message="No data", status_code=400, details="The request did not contain data")
-    request.on_json_loading_failed = utils.on_json_load_error
-    data = request.get_json()
-
+    data = get_request_data()
     repo = create_repo_object(data)
-
+    if not GitHelper.validate_git_url(repo.repo):
+        raise ApiError(message="Error in cloning the repo", status_code=503,
+                       details="Error cloning the repo due to invalid repo URL")
     parsed_url = GitHelper.parse_git_url(repo.repo)
 
     cloned_repo = clone_repo(parsed_url, repo)
@@ -67,7 +64,7 @@ def create_repo_object(data):
         repo_schema = RepoSchema(unknown=INCLUDE)
         repo = repo_schema.load(data)
     except ValidationError as error:
-        logger.error("The data" + data + "was not valid due to " + str(error.messages))
+        logger.error("The data" + data + "was not valid due to " + str(error))
         raise ApiError("Bad Request", 400, details="Repository URL cannot be empty")
     return repo
 
@@ -87,7 +84,7 @@ def upload_repo(cloned_repo):
 
 @api_blueprint.route('/info', methods=['GET'])
 def info():
-    commit_hash = os.environ['COMMIT_HASH'] if not os.environ['COMMIT_HASH'] is None else ''
+    commit_hash = os.environ.get('COMMIT_HASH', '')
     return jsonify({'commit_hash': commit_hash}), 200
 
 
@@ -107,16 +104,22 @@ def status():
 
 
 def get_upload_data():
-    if not request.data:
-        raise ApiError(message="No data", status_code=400, details="The request did not contain data")
-    request.on_json_loading_failed = utils.on_json_load_error
-    request_data = request.get_json()
+    request_data = get_request_data()
     if not 'status_key' in request_data.keys():
         raise ApiError(message="Incorrect status key", status_code=400,
                        details="The request did not contain key named status_key ")
 
     status_data = json.loads(broker.get(request_data.get('status_key')))
     return status_data
+
+
+def get_request_data():
+    if not request.data:
+        raise ApiError(message="No data", status_code=400, details="The request did not contain data")
+    request.on_json_loading_failed = utils.on_json_load_error
+    # if Accept header is not present, try to access data as JSON
+    request_data = request.get_json() if request.get_json() is not None else request.get_json(force=True)
+    return request_data
 
 
 @swag_from(get_docs_path_for('progress_update_api_all.yaml'))

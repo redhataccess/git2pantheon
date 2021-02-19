@@ -35,6 +35,14 @@ class GitHelper():
         """
         return giturlparse.parse(url)
 
+    @classmethod
+    def validate_git_url(cls, url):
+        """
+        Parses the git url into scheme, port, repo name etc.
+        :param url: git url to be parsed
+        :return:
+        """
+        return giturlparse.validate(url)
 
 class ProgressHelper(RemoteProgress):
     def line_dropped(self, line):
