@@ -38,8 +38,7 @@ def push_repo():
     cloned_repo = clone_repo(parsed_url, repo)
 
     logger.info("starting upload of repo=" + repo.repo + " (local dir=" + cloned_repo.working_dir)
-    pantheon.channel_name = parsed_url.repo
-    executor.submit(upload_repo, cloned_repo)
+    executor.submit(upload_repo, cloned_repo, parsed_url.repo)
 
     return jsonify({"status_key": parsed_url.repo}), 202
 
@@ -69,12 +68,12 @@ def create_repo_object(data):
     return repo
 
 
-def upload_repo(cloned_repo):
+def upload_repo(cloned_repo, channel_name):
     try:
         pantheon.start_process(numeric_level=10, pw=current_app.config['UPLOADER_PASSWORD'],
                                user=current_app.config['UPLOADER_USER'],
                                server=current_app.config['PANTHEON_SERVER'], directory=cloned_repo.working_dir,
-                               use_broker=True)
+                               use_broker=True, channel=channel_name)
     except Exception as e:
         logger.error("Upload failed due to error=" + str(e))
 
@@ -95,12 +94,13 @@ def status():
 
     status_message = Status(current_status=status_data['current_status'],
                             file_type=status_data.get('type_uploading', ""),
-                            last_uploaded_file=status_data.get('last_uploaded_file'),
+                            last_uploaded_file=status_data.get('last_file_uploaded'),
                             total_files_uploaded=status_data.get('total_files_uploaded'))
     return jsonify(
         dict(status=status_message.current_status,
              currently_uploading=status_message.processing_file_type,
-             last_uploaded_file=status_message.last_uploaded_file)), 200
+             last_uploaded_file=status_message.last_uploaded_file,
+             total_files_uploaded=status_message.total_files_uploaded)), 200
 
 
 def get_upload_data():
