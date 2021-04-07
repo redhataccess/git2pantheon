@@ -31,7 +31,7 @@ def push_repo():
     data = get_request_data()
     repo = create_repo_object(data)
     if not GitHelper.validate_git_url(repo.repo):
-        raise ApiError(message="Error in cloning the repo", status_code=503,
+        raise ApiError(message="Error in cloning the repo", status_code=400,
                        details="Error cloning the repo due to invalid repo URL")
     parsed_url = GitHelper.parse_git_url(repo.repo)
 
