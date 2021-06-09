@@ -15,26 +15,32 @@ cd git2pantheon
 ```
 3. Create and activate a virtual environment.   
 ```
-python3 -m venv .
+python3 -m venv venv
 ```
 ```
-venv/bin/activate
+source venv/bin/activate
 ```
 
 4. Install the requirements.  
 ```
-pip3 install --user -r requirements.txt
+pip3 install .
 ```
 5. Set and export the following environment variables  
    a. PANTHEON_SERVER  
    b. UPLOADER_PASSWORD  
    c. UPLOADER_USER
    
-6. Run the service.  
+
+6. Set the app name for flask run command
 ```
-python3 git2panthenon/wsgi.py
+export FLASK_APP=git2pantheon
 ```
    
-7. The swagger docs can be found at:  
+7. Run the service.  
+```
+flask run
+```
+   
+8. The swagger docs can be found at:  
 http://localhost:5000/apidocs/
    
