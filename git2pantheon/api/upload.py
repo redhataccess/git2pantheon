@@ -34,28 +34,37 @@ def push_repo():
         raise ApiError(message="Error in cloning the repo", status_code=400,
                        details="Error cloning the repo due to invalid repo URL")
     parsed_url = GitHelper.parse_git_url(repo.repo)
+    # if the key is already present, status API could give stale data
+    # resetting the keys' values mitigates the issue
+    reset_if_exists(parsed_url.name)
 
-    cloned_repo = clone_repo(parsed_url, repo)
-
-    logger.info("starting upload of repo=" + repo.repo + " (local dir=" + cloned_repo.working_dir)
-    executor.submit(upload_repo, cloned_repo, parsed_url.repo)
-
+    executor.submit(clone_repo, parsed_url.name, parsed_url.url, repo.branch)
     return jsonify({"status_key": parsed_url.repo}), 202
 
 
-def clone_repo(parsed_url, repo):
+def clone_repo(repo_name, repo_url, branch):
     try:
-        MessageHelper.publish(parsed_url.repo, json.dumps({"current_status": "Cloning repo " + repo.repo + ""}))
-        logger.info("Cloning repo=" + repo.repo + " and branch=" + repo.branch)
+        
+        MessageHelper.publish(repo_name + "-clone",
+                              json.dumps(dict(current_status="cloning", details="Cloning repo " + repo_name + "")))
+        logger.info("Cloning repo=" + repo_url + " and branch=" + branch)
 
-        cloned_repo = GitHelper.clone(repo_url=repo.repo, branch=repo.branch,
+        cloned_repo = GitHelper.clone(repo_url=repo_url, branch=branch,
                                       clone_dir=expanduser("~") + "/temp/" + FileHelper.get_random_name(10))
     except BaseException as e:
-        logger.error("Cloning of repo=" + repo.repo + "  with branch=" + repo.branch + " failed due to error=" + str(e))
+        logger.error("Cloning of repo=" + repo_url + "  with branch=" + branch + " failed due to error=" + str(e))
         # return jsonify({"error": "Error cloning " + repo.repo + " with branch  due to " + str(e)}), 500
-        raise ApiError(message="Error in cloning " + parsed_url.repo, status_code=503,
-                       details="Error cloning " + repo.repo + " with branch " + repo.branch + " due to " + str(e))
-    return cloned_repo
+        MessageHelper.publish(repo_name + "-clone",
+                              json.dumps(dict(current_status="error",
+                                              details="Cloning repo " + repo_name + " with branch=" + branch +
+                                                      "failed due to error=" + str(e))))
+        return
+
+    MessageHelper.publish(repo_name + "-clone",
+                          json.dumps(dict(current_status="success",
+                                          details="Cloning of repo=" + repo_url + "  with branch=" +
+                                                  branch + " is successful")))
+    upload_repo(cloned_repo, repo_name)
 
 
 def create_repo_object(data):
@@ -90,27 +99,38 @@ def info():
 @swag_from(get_docs_path_for('status_api.yaml'))
 @api_blueprint.route('/status', methods=['POST'])
 def status():
-    status_data = get_upload_data()
-
-    status_message = Status(current_status=status_data['current_status'],
+    status_data, clone_data = get_upload_data()
+    current_status = get_current_status(clone_data, status_data)
+    logger.debug("current status="+current_status)
+    status_message = Status(clone_status=clone_data.get('current_status', ""),
+                            current_status=current_status,
                             file_type=status_data.get('type_uploading', ""),
                             last_uploaded_file=status_data.get('last_file_uploaded'),
                             total_files_uploaded=status_data.get('total_files_uploaded'))
     return jsonify(
         dict(status=status_message.current_status,
+             clone_status=status_message.clone_status,
              currently_uploading=status_message.processing_file_type,
              last_uploaded_file=status_message.last_uploaded_file,
              total_files_uploaded=status_message.total_files_uploaded)), 200
 
 
+def get_current_status(clone_data, status_data):
+    logger.debug('upload status data='+json.dumps(status_data))
+    logger.debug('clone status data='+json.dumps(clone_data))
+    return status_data.get('current_status') if status_data.get('current_status', "") != "" else clone_data[
+        'current_status']
+
+
 def get_upload_data():
     request_data = get_request_data()
-    if not 'status_key' in request_data.keys():
+    if 'status_key' not in request_data.keys():
         raise ApiError(message="Incorrect status key", status_code=400,
                        details="The request did not contain key named status_key ")
 
     status_data = json.loads(broker.get(request_data.get('status_key')))
-    return status_data
+    clone_data = json.loads(broker.get(request_data.get('status_key') + "-clone"))
+    return status_data, clone_data
 
 
 def get_request_data():
@@ -122,10 +142,15 @@ def get_request_data():
     return request_data
 
 
+def reset_if_exists(repo_name):
+    MessageHelper.publish(repo_name +"-clone", json.dumps(dict(current_status='')))
+    MessageHelper.publish(repo_name, json.dumps(dict(current_status='')))
+
+
 @swag_from(get_docs_path_for('progress_update_api_all.yaml'))
 @api_blueprint.route('/progress-update/all', methods=['POST'])
 def progress_update():
-    status_data = get_upload_data()
+    status_data, clone_data = get_upload_data()
     # status_progress: UploadStatus = upload_status_from_dict(status_data)
     if status_data["server"] and status_data["server"]["response_code"] and not 200 <= int(status_data["server"][
                                                                                                "response_code"]) <= 400:
@@ -161,7 +186,7 @@ def progress_update():
 @swag_from(get_docs_path_for('progress_update_api_modules.yaml'))
 @api_blueprint.route('/progress-update/modules', methods=['POST'])
 def progress_update_modules():
-    status_data = get_upload_data()
+    status_data, clone_data = get_upload_data()
     if status_data["server"] and status_data["server"]["response_code"] and not 200 <= int(status_data["server"][
                                                                                                "response_code"]) <= 400:
         return jsonify(
@@ -186,7 +211,7 @@ def progress_update_modules():
 @swag_from(get_docs_path_for('progress_update_api_assemblies.yaml'))
 @api_blueprint.route('/progress-update/assemblies', methods=['POST'])
 def progress_update_assemblies():
-    status_data = get_upload_data()
+    status_data, clone_data = get_upload_data()
 
     if status_data["server"] and status_data["server"]["response_code"] and not 200 <= int(status_data["server"][
                                                                                                "response_code"]) <= 400:
@@ -214,7 +239,7 @@ def progress_update_assemblies():
 @swag_from(get_docs_path_for('progress_update_api_resources.yaml'))
 @api_blueprint.route('/progress-update/resources', methods=['POST'])
 def progress_update_resources():
-    status_data = get_upload_data()
+    status_data, clone_data = get_upload_data()
     if status_data["server"] and status_data["server"]["response_code"] and not 200 <= int(status_data["server"][
                                                                                                "response_code"]) <= 400:
         return jsonify(

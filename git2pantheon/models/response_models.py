@@ -2,7 +2,8 @@ from marshmallow import Schema, fields, post_load
 
 
 class Status():
-    def __init__(self, current_status, file_type, last_uploaded_file, total_files_uploaded):
+    def __init__(self, clone_status, current_status, file_type, last_uploaded_file, total_files_uploaded):
+        self.clone_status = clone_status
         self.current_status = current_status
         self.processing_file_type = file_type
         self.last_uploaded_file = last_uploaded_file
