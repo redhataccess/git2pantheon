@@ -28,7 +28,8 @@ pip3 install .
 5. Set and export the following environment variables  
    a. PANTHEON_SERVER  
    b. UPLOADER_PASSWORD  
-   c. UPLOADER_USER
+   c. UPLOADER_USER  
+   d. REDIS_SERVICE
    
 
 6. Set the app name for flask run command
