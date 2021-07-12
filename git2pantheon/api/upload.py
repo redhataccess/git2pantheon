@@ -81,10 +81,14 @@ def upload_repo(cloned_repo, channel_name):
     try:
         pantheon.start_process(numeric_level=10, pw=current_app.config['UPLOADER_PASSWORD'],
                                user=current_app.config['UPLOADER_USER'],
-                               server=current_app.config['PANTHEON_SERVER'], directory=cloned_repo.working_dir,
-                               use_broker=True, channel=channel_name)
+                               server=current_app.config['PANTHEON_SERVER'],  directory=cloned_repo.working_dir,
+                               use_broker=True, channel=channel_name, broker_host= os.getenv('REDIS_SERVICE') )
     except Exception as e:
         logger.error("Upload failed due to error=" + str(e))
+        MessageHelper.publish(channel_name,
+                              json.dumps(dict(current_status="error",
+                                              details="Uploading of  repo " + channel_name +
+                                                      "failed due to error=" + str(e))))
 
     logger.info("removing temporary cloned directory=" + cloned_repo.working_dir)
     shutil.rmtree(cloned_repo.working_dir)
@@ -152,7 +156,7 @@ def reset_if_exists(repo_name):
 def progress_update():
     status_data, clone_data = get_upload_data()
     # status_progress: UploadStatus = upload_status_from_dict(status_data)
-    if status_data["server"] and status_data["server"]["response_code"] and not 200 <= int(status_data["server"][
+    if "server" in status_data and status_data["server"]["response_code"] and not 200 <= int(status_data["server"][
                                                                                                "response_code"]) <= 400:
         return jsonify(
             dict(
