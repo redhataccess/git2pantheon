@@ -7,7 +7,7 @@ entry_points = {
 package_data = ['*.yaml']
 setup(
     name='git2pantheon',
-    version='0.1',
+    version='0.2',
     packages=find_packages(),
     url='',
     license='',
@@ -39,9 +39,9 @@ setup(
         'marshmallow>=3.9.1',
         'gitpython>=3.1.11',
         'gunicorn',
-        'pantheon-uploader @ git+https://github.com/aprajshekhar/pantheon-uploader.git@ap_CCS-4407_redis_ser#egg=pantheon-uploader-0.2'
+        'pantheon-uploader @ git+https://github.com/redhataccess/pantheon-uploader.git@master#egg=pantheon-uploader-0.2'
     ],
-    dependency_links=['https://github.com/aprajshekhar/pantheon-uploader/tarball/ap_CCS-4407_redis_ser#egg=pantheon-uploader'],
+    dependency_links=['https://github.com/redhataccess/pantheon-uploader/tarball/master#egg=pantheon-uploader'],
     entry_points=entry_points,
     package_data={'': package_data}
 )
