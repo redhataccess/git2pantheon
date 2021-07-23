@@ -290,23 +290,23 @@ def clear_cache():
     return jsonify(cache_clear_result)
 
 
-def drupal_cache_clear_bulk(cache_clear_result, cache_req_data):
-    if "assemblies" in cache_req_data:
+def bulk_cache_clear_drupal(cache_clear_result, cache_req_data):
+    if ASSEMBLIES in cache_req_data:
         cache_clear_result["drupal_result_assemblies"] = drupal_client.purge_cache_assembly("assemblies")
 
-    if "modules" in cache_req_data:
+    if MODULES in cache_req_data:
         cache_clear_result["drupal_result_modules"] = drupal_client.purge_cache_assembly("modules")
 
 
 def clear_drupal_cache(data, cache_clear_result, bulk_clear=False):
     cache_req_data = CacheObjectHelper.get_drupal_req_data(data)
     if bulk_clear:
-        drupal_cache_clear_bulk(cache_clear_result, cache_req_data)
+        bulk_cache_clear_drupal(cache_clear_result, cache_req_data)
         return
-    drupal_cache_clear_individual(cache_clear_result, cache_req_data)
+    individual_cache_clear_drupal(cache_clear_result, cache_req_data)
 
 
-def drupal_cache_clear_individual(cache_clear_result, cache_req_data):
+def individual_cache_clear_drupal(cache_clear_result, cache_req_data):
     if ASSEMBLIES in cache_req_data:
         for guid in cache_req_data[ASSEMBLIES]:
             cache_clear_result["drupal_result_assemblies"][str(guid)] = drupal_client.purge_cache_assembly(guid)
