@@ -10,22 +10,6 @@ parameters:
     required: true
     schema:
       $ref: '#/definitions/CacheClearData'
-
-reponses:
-  200:
-    description: 'The status of upload corresponding to the key'
-    schema:
-      $ref: '#/definitions/UploaderKey'
-  400:
-    description: 'Invalid content error'
-    schema:
-      $ref: '#/definitions/Error'
-  500:
-    description: 'Internal server error'
-    schema:
-      $ref: '#/definitions/Error'
-
-
 definitions:
   CacheClearData:
     type: object
@@ -50,4 +34,30 @@ definitions:
       details:
         type: string
         description: 'Error details'
-
+  CacheClearResult:
+    type: object
+    properties:
+      akamai_result:
+        type: object
+        description: 'Result of Akamai cache clear'
+      drupal_result_assemblies:
+        type: object
+        description: 'Result of Drupal cache clear for assemblies'
+      drupal_result_modules:
+        type: object
+        description: 'Result of Drupal cache clear for modules'
+produces:
+        - application/json
+reponses:
+  200:
+    description: 'The status of cache clear operation'
+    schema:
+      $ref: '#/definitions/CacheClearResult'
+  400:
+    description: 'Invalid content error'
+    schema:
+      $ref: '#/definitions/Error'
+  500:
+    description: 'Internal server error'
+    schema:
+      $ref: '#/definitions/Error'

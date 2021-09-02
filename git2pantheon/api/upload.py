@@ -292,27 +292,15 @@ def clear_cache():
 
 def bulk_cache_clear_drupal(cache_clear_result, cache_req_data):
     if ASSEMBLIES in cache_req_data:
-        cache_clear_result["drupal_result_assemblies"] = drupal_client.purge_cache_assembly("assemblies")
+        cache_clear_result["drupal_result_assemblies"] = drupal_client.purge_cache_assembly_bulk("assemblies")
 
     if MODULES in cache_req_data:
-        cache_clear_result["drupal_result_modules"] = drupal_client.purge_cache_assembly("modules")
+        cache_clear_result["drupal_result_modules"] = drupal_client.purge_cache_module_bulk("modules")
 
 
-def clear_drupal_cache(data, cache_clear_result, bulk_clear=False):
+def clear_drupal_cache(data, cache_clear_result):
     cache_req_data = CacheObjectHelper.get_drupal_req_data(data)
-    if bulk_clear:
-        bulk_cache_clear_drupal(cache_clear_result, cache_req_data)
-        return
-    individual_cache_clear_drupal(cache_clear_result, cache_req_data)
-
-
-def individual_cache_clear_drupal(cache_clear_result, cache_req_data):
-    if ASSEMBLIES in cache_req_data:
-        for guid in cache_req_data[ASSEMBLIES]:
-            cache_clear_result["drupal_result_assemblies"][str(guid)] = drupal_client.purge_cache_assembly(guid)
-    if MODULES in cache_req_data:
-        for guid in cache_req_data[MODULES]:
-            cache_clear_result["drupal_result_modules"][str(guid)] = (drupal_client.purge_cache_module(guid))
+    bulk_cache_clear_drupal(cache_clear_result, cache_req_data)
 
 
 def clear_akamai_cache(data, cache_clear_result):
