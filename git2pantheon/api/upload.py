@@ -292,10 +292,10 @@ def clear_cache():
 
 def bulk_cache_clear_drupal(cache_clear_result, cache_req_data):
     if ASSEMBLIES in cache_req_data:
-        cache_clear_result["drupal_result_assemblies"] = drupal_client.purge_cache_assembly_bulk("assemblies")
+        cache_clear_result["drupal_result_assemblies"] = drupal_client.purge_cache_assembly_bulk({'ids':cache_req_data["assemblies"]})
 
     if MODULES in cache_req_data:
-        cache_clear_result["drupal_result_modules"] = drupal_client.purge_cache_module_bulk("modules")
+        cache_clear_result["drupal_result_modules"] = drupal_client.purge_cache_module_bulk({'ids':cache_req_data["modules"]})
 
 
 def clear_drupal_cache(data, cache_clear_result):

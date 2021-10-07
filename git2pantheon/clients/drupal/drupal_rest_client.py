@@ -1,6 +1,14 @@
+import logging
+import http.client
 from decorest import RestClient, GET, on, header, POST, body
 
 
+http.client.HTTPConnection.debuglevel = 1
+logging.basicConfig()
+logging.getLogger().setLevel(logging.DEBUG)
+requests_log = logging.getLogger("requests.packages.urllib3")
+requests_log.setLevel(logging.DEBUG)
+requests_log.propagate = True
 class DrupalClient(RestClient):
     def __init__(self, *args, **kwargs):
         super(DrupalClient, self).__init__(*args, **kwargs)
