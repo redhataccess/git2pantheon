@@ -14,14 +14,19 @@ from marshmallow import ValidationError, INCLUDE
 from pantheon_uploader import pantheon
 from . import api_blueprint
 from . import executor
+from . import drupal_client
+from . import akamai_purge_client
 from .. import utils
-from ..helpers import FileHelper, GitHelper, MessageHelper
+from ..helpers import FileHelper, GitHelper, MessageHelper, CacheObjectHelper
 from ..messaging import broker
 from ..models.request_models import RepoSchema
 from ..models.response_models import Status
 from ..utils import ApiError, get_docs_path_for
 from flask import current_app
+from decorest import HTTPErrorWrapper
 
+ASSEMBLIES = "assemblies"
+MODULES = "modules"
 logger = logging.getLogger(__name__)
 
 
@@ -44,7 +49,7 @@ def push_repo():
 
 def clone_repo(repo_name, repo_url, branch):
     try:
-        
+
         MessageHelper.publish(repo_name + "-clone",
                               json.dumps(dict(current_status="cloning", details="Cloning repo " + repo_name + "")))
         logger.info("Cloning repo=" + repo_url + " and branch=" + branch)
@@ -81,8 +86,8 @@ def upload_repo(cloned_repo, channel_name):
     try:
         pantheon.start_process(numeric_level=10, pw=current_app.config['UPLOADER_PASSWORD'],
                                user=current_app.config['UPLOADER_USER'],
-                               server=current_app.config['PANTHEON_SERVER'],  directory=cloned_repo.working_dir,
-                               use_broker=True, channel=channel_name, broker_host= os.getenv('REDIS_SERVICE') )
+                               server=current_app.config['PANTHEON_SERVER'], directory=cloned_repo.working_dir,
+                               use_broker=True, channel=channel_name, broker_host=os.getenv('REDIS_SERVICE'))
     except Exception as e:
         logger.error("Upload failed due to error=" + str(e))
         MessageHelper.publish(channel_name,
@@ -105,7 +110,7 @@ def info():
 def status():
     status_data, clone_data = get_upload_data()
     current_status = get_current_status(clone_data, status_data)
-    logger.debug("current status="+current_status)
+    logger.debug("current status=" + current_status)
     status_message = Status(clone_status=clone_data.get('current_status', ""),
                             current_status=current_status,
                             file_type=status_data.get('type_uploading', ""),
@@ -120,8 +125,8 @@ def status():
 
 
 def get_current_status(clone_data, status_data):
-    logger.debug('upload status data='+json.dumps(status_data))
-    logger.debug('clone status data='+json.dumps(clone_data))
+    logger.debug('upload status data=' + json.dumps(status_data))
+    logger.debug('clone status data=' + json.dumps(clone_data))
     return status_data.get('current_status') if status_data.get('current_status', "") != "" else clone_data[
         'current_status']
 
@@ -147,7 +152,7 @@ def get_request_data():
 
 
 def reset_if_exists(repo_name):
-    MessageHelper.publish(repo_name +"-clone", json.dumps(dict(current_status='')))
+    MessageHelper.publish(repo_name + "-clone", json.dumps(dict(current_status='')))
     MessageHelper.publish(repo_name, json.dumps(dict(current_status='')))
 
 
@@ -157,7 +162,7 @@ def progress_update():
     status_data, clone_data = get_upload_data()
     # status_progress: UploadStatus = upload_status_from_dict(status_data)
     if "server" in status_data and status_data["server"]["response_code"] and not 200 <= int(status_data["server"][
-                                                                                               "response_code"]) <= 400:
+                                                                                                 "response_code"]) <= 400:
         return jsonify(
             dict(
                 server_status=status_data["server"]["response_code"],
@@ -265,3 +270,40 @@ def progress_update_resources():
     return jsonify(
         response_dict
     ), 200
+
+
+@swag_from(get_docs_path_for('cache_clear_api.yaml'))
+@api_blueprint.route('/cache/clear', methods=['POST'])
+def clear_cache():
+    data = get_request_data()
+    cache_clear_result = {
+        "drupal_result_assemblies":{},
+        "drupal_result_modules": {}
+    }
+
+    try:
+        clear_drupal_cache(data, cache_clear_result)
+        clear_akamai_cache(data,cache_clear_result)
+    except Exception as e:
+        logger.error("Exception occurred while trying to clear  cache with error=" + str(e))
+        raise ApiError("Upstream Server Error", 503, details=str(e))
+    return jsonify(cache_clear_result)
+
+
+def bulk_cache_clear_drupal(cache_clear_result, cache_req_data):
+    if ASSEMBLIES in cache_req_data:
+        cache_clear_result["drupal_result_assemblies"] = drupal_client.purge_cache_assembly_bulk({'ids':cache_req_data["assemblies"]})
+
+    if MODULES in cache_req_data:
+        cache_clear_result["drupal_result_modules"] = drupal_client.purge_cache_module_bulk({'ids':cache_req_data["modules"]})
+
+
+def clear_drupal_cache(data, cache_clear_result):
+    cache_req_data = CacheObjectHelper.get_drupal_req_data(data)
+    bulk_cache_clear_drupal(cache_clear_result, cache_req_data)
+
+
+def clear_akamai_cache(data, cache_clear_result):
+    cache_req_data = CacheObjectHelper.get_akamai_req_object(data)
+    cache_clear_result['akamai_result'] = akamai_purge_client.purge(cache_req_data)
+
