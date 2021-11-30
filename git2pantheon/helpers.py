@@ -44,6 +44,7 @@ class GitHelper():
         """
         return giturlparse.validate(url)
 
+
 class ProgressHelper(RemoteProgress):
     def line_dropped(self, line):
         logger.info(line)
@@ -73,10 +74,10 @@ class MessageHelper():
         :return:
         """
         try:
-            logger.info("Publishing key="+key+" with message="+message)
+            logger.info("Publishing key=" + key + " with message=" + message)
             broker.set(key, message)
         except Exception as e:
-            logger.error('Could not publish state due to'+str(e))
+            logger.error('Could not publish state due to' + str(e))
 
     @classmethod
     def unpublish(cls, key):
@@ -87,5 +88,51 @@ class JsonEncoder(JSONEncoder):
     """
     Helper for encoding objects into JSON
     """
+
     def default(self, object_to_serialize):
         return object_to_serialize.__dict__
+
+
+class CacheObjectHelper:
+    components = ["assemblies", "modules"]
+
+    @classmethod
+    def get_akamai_req_object(cls, purge_data: dict):
+        purge_request_body = dict()
+        urls = []
+        for component in cls.components:
+            if component in purge_data:
+                for url in purge_data[component]:
+                    urls.append(url)
+        purge_request_body['objects'] = urls
+        return purge_request_body
+
+    @classmethod
+    def get_drupal_req_data(cls, purge_data):
+        purge_request_body = dict()
+        ids = []
+        for component in cls.components:
+            if component in purge_data:
+                for url in purge_data[component]:
+                    ids.append(url.split('/')[-1])
+            purge_request_body[component] = list(ids)
+            # reset ids
+            ids.clear()
+        return purge_request_body
+
+
+class EnvironmentVariablesHelper:
+    """Verifies if the environment variables are present or not"""
+    @classmethod
+    def validate_required_vars(cls, env_vars=[]):
+        cls.check_vars(env_vars)
+
+    @classmethod
+    def check_vars(cls, env_vars):
+        for var in env_vars:
+            if var not in os.environ:
+                raise Exception("The variable=" + var + " is not present as an environment variable")
+
+    @classmethod
+    def check_non_required_vars(cls, env_vars=[]):
+        cls.check_vars(env_vars)

@@ -6,6 +6,7 @@ from werkzeug.exceptions import HTTPException
 from flasgger import Swagger
 from .api.upload import api_blueprint, executor
 import atexit
+from .helpers import EnvironmentVariablesHelper
 
 
 def create_app():
@@ -15,11 +16,23 @@ def create_app():
         EXECUTOR_MAX_WORKERS="1",
         EXECUTOR_PROPAGATE_EXCEPTIONS=True
     )
+    # check if required vars are available
+    EnvironmentVariablesHelper.check_vars(['PANTHEON_SERVER', 'UPLOADER_PASSWORD','UPLOADER_USER'])
+    try:
+        EnvironmentVariablesHelper.check_vars(['AKAMAI_HOST', 'DRUPAL_HOST', 'AKAMAI_ACCESS_TOKEN',
+                                               'AKAMAI_CLIENT_SECRET','AKAMAI_CLIENT_TOKEN'])
+    except Exception as e:
+        print(
+            'Environment variable(s) for cache clear not present.'
+            'Details={0}Please ignore if you are running on local server'.format(
+                str(e)))
+
     app.config.from_mapping(
         PANTHEON_SERVER=os.environ['PANTHEON_SERVER'],
         UPLOADER_PASSWORD=os.environ['UPLOADER_PASSWORD'],
         UPLOADER_USER=os.environ['UPLOADER_USER']
     )
+
     gunicorn_error_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers.extend(gunicorn_error_logger.handlers)
     logging.basicConfig(level=logging.DEBUG)

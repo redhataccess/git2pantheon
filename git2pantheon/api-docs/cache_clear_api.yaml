@@ -1,0 +1,53 @@
+Clears the drupal and akamai cache
+---
+tags:
+  - Clears the drupal and akamai cache.
+
+parameters:
+  - in: body
+    name: body
+    description: 'The structure containing list of URLs of modules and assemblies whose cache has to be cleared'
+    required: true
+    schema:
+      $ref: '#/definitions/CacheClearData'
+
+reponses:
+  200:
+    description: 'The status of upload corresponding to the key'
+    schema:
+      $ref: '#/definitions/UploaderKey'
+  400:
+    description: 'Invalid content error'
+    schema:
+      $ref: '#/definitions/Error'
+  500:
+    description: 'Internal server error'
+    schema:
+      $ref: '#/definitions/Error'
+
+
+definitions:
+  CacheClearData:
+    type: object
+    properties:
+      assemblies:
+        type: array
+        items:
+          type: string
+      modules:
+        type: array
+        items:
+          type: string
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+        description: 'HTTP status code of the error'
+      message:
+        type: string
+        description: 'Error message'
+      details:
+        type: string
+        description: 'Error details'
+

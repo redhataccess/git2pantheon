@@ -43,5 +43,7 @@ flask run
 ```
    
 8. The swagger docs can be found at:  
-http://localhost:5000/apidocs/
+http://localhost:5000/apidocs/  
+   
+_Note_: _Please don't try to run cache clear API_
    
