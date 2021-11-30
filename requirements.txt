@@ -1,6 +1,6 @@
 flasgger==0.9.5
 Flask==1.1.2
-git2pantheon~=0.1
+#git2pantheon~=0.1
 Werkzeug==1.0.1
 redis==3.5.3
 setuptools==54.2.0
@@ -14,4 +14,5 @@ edgegrid-python==1.0.10
 decorest==0.0.6
 requests
 requests-toolbelt==0.9.1
+git
 git+https://github.com/redhataccess/pantheon-uploader.git

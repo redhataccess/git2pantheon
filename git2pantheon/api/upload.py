@@ -283,7 +283,7 @@ def clear_cache():
 
     try:
         clear_drupal_cache(data, cache_clear_result)
-        clear_akamai_cache(data,cache_clear_result)
+        clear_akamai_cache(data, cache_clear_result)
     except Exception as e:
         logger.error("Exception occurred while trying to clear  cache with error=" + str(e))
         raise ApiError("Upstream Server Error", 503, details=str(e))
