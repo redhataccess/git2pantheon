@@ -43,7 +43,6 @@ setup(
         'decorest>=0.0.6',
         'requests',
         'requests-toolbelt>=0.9.1',
-        'git',
         'pantheon-uploader @ git+https://github.com/redhataccess/pantheon-uploader.git@master#egg=pantheon-uploader-0.2'
     ],
     dependency_links=['https://github.com/redhataccess/pantheon-uploader/tarball/master#egg=pantheon-uploader'],
