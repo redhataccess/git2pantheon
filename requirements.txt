@@ -14,4 +14,5 @@ edgegrid-python==1.0.10
 decorest==0.0.6
 requests
 requests-toolbelt==0.9.1
+gitpython==3.1.11
 git+https://github.com/redhataccess/pantheon-uploader.git
