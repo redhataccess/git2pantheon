@@ -7,7 +7,7 @@ setuptools==54.2.0
 flask-cors==3.0.10
 
 marshmallow==3.10.0
-Flask-Executor==0.9.4
+Flask-Executor==0.10.0
 giturlparse==0.10.0
 PyYAML==5.4.1
 edgegrid-python==1.0.10
