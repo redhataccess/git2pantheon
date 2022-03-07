@@ -31,7 +31,7 @@ setup(
         'webencodings>=0.5.1',
         'Werkzeug>=1.0.1',
         'xcffib>=0.9.0',
-        'gitpython==3.1.11',
+        'gitpython==3.1.27',
         'flask-cors>=3.0.9',
         'flasgger>=0.9.5',
         'Flask-Executor>=0.9.4',
