@@ -3,7 +3,7 @@ Flask==1.1.2
 #git2pantheon~=0.1
 Werkzeug==1.0.1
 redis==3.5.3
-setuptools==54.2.0
+setuptools==51.3.3
 flask-cors==3.0.10
 
 marshmallow==3.10.0
