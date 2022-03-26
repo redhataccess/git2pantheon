@@ -11,7 +11,7 @@ Flask-Executor==0.9.4
 giturlparse==0.10.0
 PyYAML==5.4.1
 edgegrid-python==1.0.10
-decorest==0.0.6
+decorest==0.1.0
 requests
 requests-toolbelt==0.9.1
 gitpython==3.1.11
