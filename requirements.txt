@@ -1,5 +1,5 @@
 flasgger==0.9.5
-Flask==1.1.2
+Flask==2.2.2
 #git2pantheon~=0.1
 Werkzeug==1.0.1
 redis==3.5.3
