@@ -6,7 +6,7 @@ redis==3.5.3
 setuptools==54.2.0
 flask-cors==3.0.10
 
-marshmallow==3.10.0
+marshmallow==3.18.0
 Flask-Executor==0.9.4
 giturlparse==0.10.0
 PyYAML==5.4.1
