@@ -1,7 +1,7 @@
 flasgger==0.9.5
 Flask==1.1.2
 #git2pantheon~=0.1
-Werkzeug==1.0.1
+Werkzeug==2.2.2
 redis==3.5.3
 setuptools==54.2.0
 flask-cors==3.0.10
