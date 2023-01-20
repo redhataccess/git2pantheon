@@ -29,8 +29,8 @@ setup(
         'urllib3>=1.25.7',
         'webencodings>=0.5.1',
         'xcffib>=0.9.0',
-        'gitpython>=3.1.20',
-        'flask-cors>=3.0.10',
+        'gitpython>=3.1.30',
+        'Flask-Cors>=3.0.10',
         'flasgger>=0.9.5',
         'Flask-Executor>=1.0.0',
         'giturlparse>=0.10.0',
@@ -41,6 +41,7 @@ setup(
         'requests>=2.27.1',
         'requests-toolbelt>=0.10.1',
         'contextvars>=2.3',
+        'typing-extensions>=4.4.0',
         'pantheon-uploader@ git+https://github.com/redhataccess/pantheon-uploader.git@master#egg=pantheon-uploader-0.2'
     ],
     dependency_links=['https://github.com/redhataccess/pantheon-uploader/tarball/master#egg=pantheon-uploader'],
