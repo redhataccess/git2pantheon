@@ -1,4 +1,4 @@
-flasgger==0.9.5
+flasgger==0.9.7.1
 Flask>=2.2.2
 #git2pantheon~=0.1
 redis>=4.4.2
