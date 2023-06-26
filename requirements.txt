@@ -3,7 +3,7 @@ Flask>=2.2.2
 #git2pantheon~=0.1
 redis>=4.4.2
 setuptools==66.0.0
-Flask-Cors==3.0.10
+Flask-Cors==4.0.0
 marshmallow>=3.19.1
 Flask-Executor==1.0.0
 giturlparse==0.10.0
