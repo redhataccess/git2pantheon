@@ -2,7 +2,7 @@ flasgger==0.9.5
 Flask>=2.2.2
 #git2pantheon~=0.1
 redis>=4.4.2
-setuptools==66.0.0
+setuptools==68.2.2
 Flask-Cors==3.0.10
 marshmallow>=3.19.1
 Flask-Executor==1.0.0
